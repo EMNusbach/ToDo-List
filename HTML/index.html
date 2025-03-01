@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="../CSS/styles.css">
+</head>
+<body>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="page" style="display: none;"> 
+        <h3>To-do List</h3>
+        <h1>Welcome Back</h1>
+        <p>Please enter your details</p>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+    
+            <button type="submit" class="btn">Sign In</button>
+
+            <p>Don't have an account? <a href="#" onclick="showPage('registerPage')">Sign up</a></p>
+        </form> 
+    </div>
+
+    <!-- Registration Page -->
+    <div id="registerPage" class="page" style="display: none;">
+        <h3>To-Do List</h3>  
+        <h1>Registration</h1>
+        <p>Please enter your details</p>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label for="register-username">Username:</label>
+                <input type="text" id="register-username" name="register-username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="register-email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Password:</label>
+                <input type="password" id="register-password" name="register-password" placeholder="Enter your password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+            </div>
+            <button type="submit" class="btn">Register</button> 
+        </form>
+    </div>
+
+    <div id="tasksPage" class="page">
+        <div class="border-container">
+            <div class="tasks-container">
+
+                <h1>To Do List</h1>
+        
+                <div class="section-title">TASKS</div>
+                <div class="tasks">
+                    <ul>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                        <li><input type="checkbox"></li>
+                    </ul>
+                </div>
+                
+                <div class="section-title">NOTES</div>
+                <div class="notes"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="../JS/app.js"></script>
+
+</body>
+</html>
