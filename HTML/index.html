@@ -9,7 +9,7 @@
 <body>
 
     <!-- Login Page -->
-    <div id="loginPage" class="page" style="display: none;"> 
+    <div id="loginPage" class="page"> 
         <h3>To-do List</h3>
         <h1>Welcome Back</h1>
         <p>Please enter your details</p>
@@ -25,13 +25,12 @@
             </div>
     
             <button type="submit" class="btn">Sign In</button>
-
-            <p>Don't have an account? <a href="#" onclick="showPage('registerPage')">Sign up</a></p>
+            <p>Don't have an account? <a href="#" id="signUpLink">Sign up</a></p>
         </form> 
     </div>
 
     <!-- Registration Page -->
-    <div id="registerPage" class="page" style="display: none;">
+    <div id="registerPage" class="page">
         <h3>To-Do List</h3>  
         <h1>Registration</h1>
         <p>Please enter your details</p>
@@ -86,7 +85,7 @@
         </div>
     </div>
 
-    <script src="../JS/app.js"></script>
+    <script src="../JS/spa.js"></script>
 
 </body>
 </html>
