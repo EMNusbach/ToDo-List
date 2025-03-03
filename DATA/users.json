@@ -1,0 +1,53 @@
+{
+    "johnDoe123": {
+      "email": "john.doe123@gmail.com",
+      "password": "johnDoe123",
+      "confirmPassword": "johnDoe123"
+    },
+    "marySmith": {
+      "email": "mary.smith@gmail.com",
+      "password": "marySmith123",
+      "confirmPassword": "marySmith123"
+    },
+    "robertBrown": {
+      "email": "robert.brown@gmail.com",
+      "password": "robertBrown123",
+      "confirmPassword": "robertBrown123"
+    },
+    "lucyWang": {
+      "email": "lucy.wang@gmail.com",
+      "password": "lucyWang123",
+      "confirmPassword": "lucyWang123"
+    },
+    "mikeDavis": {
+      "email": "mike.davis@gmail.com",
+      "password": "mikeDavis123",
+      "confirmPassword": "mikeDavis123"
+    },
+    "annaLee": {
+      "email": "anna.lee@gmail.com",
+      "password": "annaLee123",
+      "confirmPassword": "annaLee123"
+    },
+    "jamesWilson": {
+      "email": "james.wilson@gmail.com",
+      "password": "jamesWilson123",
+      "confirmPassword": "jamesWilson123"
+    },
+    "emilyClark": {
+      "email": "emily.clark@gmail.com",
+      "password": "emilyClark123",
+      "confirmPassword": "emilyClark123"
+    },
+    "danielMartinez": {
+      "email": "daniel.martinez@gmail.com",
+      "password": "danielMartinez123",
+      "confirmPassword": "danielMartinez123"
+    },
+    "susanWhite": {
+      "email": "susan.white@gmail.com",
+      "password": "susanWhite123",
+      "confirmPassword": "susanWhite123"
+    }
+}
+  

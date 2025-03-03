@@ -1,8 +1,5 @@
-
-// SPA Navigation Handler
 const app = {
     init: function() {
-
         // Handle form button navigation
         document.querySelectorAll("form button").forEach(button => {
             button.addEventListener("click", app.handleNavigation);
@@ -17,24 +14,35 @@ const app = {
         // Handle browser back/forward buttons
         window.addEventListener("popstate", app.handlePopState);
 
-        // Set default page to #loginPage if there's no hash in the URL
+        // Handle hash change event
+        window.addEventListener("hashchange", app.handleHashChange);
+
+        // Ensure the correct page is shown on initial load
+        app.handleHashChange();
+
+        // Ensure the URL has #loginPage on first load if there's no hash
         if (!location.hash) {
             history.replaceState({ page: "loginPage" }, "", "#loginPage");
         }
-
-        // Show the correct page on initial load
-        let page = location.hash.replace("#", "") || "loginPage";
-        app.showPage(page, false);
     },
 
     handleNavigation: function(event) {
         event.preventDefault(); // Prevent form submission
 
         let targetPage = "";
+        const form = event.target.closest("form");
 
-        if (event.target.closest("form").id === "register-form") {
+        if (form && form.id === "register-form") {
+            // Register the user
+            const username = form.querySelector("#register-username").value;
+            const password = form.querySelector("#register-password").value;
+            app.registerUser(username, password);
             targetPage = "loginPage"; // After register, go to login
-        } else if (event.target.closest("form").id === "login-form") {
+        } else if (form && form.id === "login-form") {
+            // Login the user
+            const username = form.querySelector("#login-username").value;
+            const password = form.querySelector("#login-password").value;
+            app.loginUser(username, password);
             targetPage = "tasksPage"; // After login, go to tasks
         }
 
@@ -45,16 +53,60 @@ const app = {
 
     showPage: function(pageId, addToHistory = true) {
         document.querySelectorAll(".page").forEach(div => div.style.display = "none"); // Hide all pages
-        document.getElementById(pageId).style.display = "block"; // Show the target page
+        let targetPage = document.getElementById(pageId);
 
-        if (addToHistory) {
-            history.pushState({ page: pageId }, "", `#${pageId}`); // Update browser history
+        if (targetPage) {
+            targetPage.style.display = "block"; // Show the target page
+
+            if (addToHistory) {
+                history.pushState({ page: pageId }, "", `#${pageId}`); // Update browser history
+            }
+        } else {
+            console.error(`Page ID "${pageId}" not found.`);
         }
     },
 
     handlePopState: function(event) {
         let page = event.state ? event.state.page : "loginPage"; // Default to loginPage
         app.showPage(page, false);
+    },
+
+    handleHashChange: function() {
+        let page = location.hash.replace("#", "") || "loginPage";
+        app.showPage(page, false);
+    },
+
+    // User registration logic
+    registerUser: async function(username, password) {
+        const response = await registerUser(username, password); // Call to usersAPI.js
+        if (response.success) {
+            alert("Registration successful! You can now login.");
+        } else {
+            alert(response.message || "Registration failed.");
+        }
+    },
+
+    // User login logic
+    loginUser: async function(username, password) {
+        const response = await loginUser(username, password); // Call to usersAPI.js
+        if (response.message === "Login successful") {
+            app.showPage("tasksPage", true);
+            app.loadTasks(username); // Load tasks for the logged-in user
+        } else {
+            alert(response.message || "Login failed.");
+        }
+    },
+
+    // Load tasks for logged-in user
+    loadTasks: async function(username) {
+        const tasks = await getTasks(username); // Call to tasksAPI.js
+        const taskListContainer = document.getElementById("task-list");
+
+        tasks.forEach(task => {
+            const taskItem = document.createElement("li");
+            taskItem.textContent = `${task.title}: ${task.description}`;
+            taskListContainer.appendChild(taskItem);
+        });
     }
 };
 
