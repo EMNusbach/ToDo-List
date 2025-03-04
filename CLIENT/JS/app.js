@@ -30,19 +30,10 @@ const app = {
         event.preventDefault(); // Prevent form submission
 
         let targetPage = "";
-        const form = event.target.closest("form");
 
-        if (form && form.id === "register-form") {
-            // Register the user
-            const username = form.querySelector("#register-username").value;
-            const password = form.querySelector("#register-password").value;
-            app.registerUser(username, password);
+        if (event.target.closest("form").id === "register-form") {
             targetPage = "loginPage"; // After register, go to login
-        } else if (form && form.id === "login-form") {
-            // Login the user
-            const username = form.querySelector("#login-username").value;
-            const password = form.querySelector("#login-password").value;
-            app.loginUser(username, password);
+        } else if (event.target.closest("form").id === "login-form") {
             targetPage = "tasksPage"; // After login, go to tasks
         }
 
@@ -74,68 +65,13 @@ const app = {
     handleHashChange: function() {
         let page = location.hash.replace("#", "") || "loginPage";
         app.showPage(page, false);
-    },
-
-    // User registration logic
-    registerUser: async function(username, password) {
-        const response = await registerUser(username, password); // Call to usersAPI.js
-        if (response.success) {
-            alert("Registration successful! You can now login.");
-        } else {
-            alert(response.message || "Registration failed.");
-        }
-    },
-
-    // User login logic
-    loginUser: async function(username, password) {
-        const response = await loginUser(username, password); // Call to usersAPI.js
-        if (response.message === "Login successful") {
-            localStorage.setItem("loggedInUser", username); // Store username
-            app.showPage("tasksPage", true);
-            app.loadTasks(username); // Load tasks for the logged-in user
-        } else {
-            alert(response.message || "Login failed.");
-        }
-    },
-
-    // Load tasks for logged-in user
-    loadTasks: async function(username) {
-        const data = await getTasksAndNote(username); // Call to tasksAPI.js
-        const taskListContainer = document.getElementById("task-list");
-        const noteContainer = document.getElementById("note");
-
-        // Clear previous content
-        taskListContainer.innerHTML = "";
-        noteContainer.textContent = "";
-
-        if (data.tasks.length === 0) {
-            taskListContainer.innerHTML = "<li>No tasks found</li>";
-        } else {
-            data.tasks.forEach((task, index) => {
-                const taskItem = document.createElement("li");
-                taskItem.textContent = `${task.task} - ${task.status}`;
-
-                // Add a button to mark task as completed
-                if (task.status === "incomplete") {
-                    const completeBtn = document.createElement("button");
-                    completeBtn.textContent = "Complete";
-                    completeBtn.addEventListener("click", async () => {
-                        await updateTaskStatus(username, index, "completed");
-                        app.loadTasks(username); // Reload after update
-                    });
-                    taskItem.appendChild(completeBtn);
-                }
-
-                taskListContainer.appendChild(taskItem);
-            });
-        }
-
-        // Show the user's note
-        if (data.note) {
-            noteContainer.textContent = `Note: ${data.note}`;
-        }
     }
 };
 
 // Initialize the SPA
 document.addEventListener("DOMContentLoaded", app.init);
+
+
+
+
+
