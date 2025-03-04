@@ -90,6 +90,7 @@ const app = {
     loginUser: async function(username, password) {
         const response = await loginUser(username, password); // Call to usersAPI.js
         if (response.message === "Login successful") {
+            localStorage.setItem("loggedInUser", username); // Store username
             app.showPage("tasksPage", true);
             app.loadTasks(username); // Load tasks for the logged-in user
         } else {
@@ -99,14 +100,40 @@ const app = {
 
     // Load tasks for logged-in user
     loadTasks: async function(username) {
-        const tasks = await getTasks(username); // Call to tasksAPI.js
+        const data = await getTasksAndNote(username); // Call to tasksAPI.js
         const taskListContainer = document.getElementById("task-list");
+        const noteContainer = document.getElementById("note");
 
-        tasks.forEach(task => {
-            const taskItem = document.createElement("li");
-            taskItem.textContent = `${task.title}: ${task.description}`;
-            taskListContainer.appendChild(taskItem);
-        });
+        // Clear previous content
+        taskListContainer.innerHTML = "";
+        noteContainer.textContent = "";
+
+        if (data.tasks.length === 0) {
+            taskListContainer.innerHTML = "<li>No tasks found</li>";
+        } else {
+            data.tasks.forEach((task, index) => {
+                const taskItem = document.createElement("li");
+                taskItem.textContent = `${task.task} - ${task.status}`;
+
+                // Add a button to mark task as completed
+                if (task.status === "incomplete") {
+                    const completeBtn = document.createElement("button");
+                    completeBtn.textContent = "Complete";
+                    completeBtn.addEventListener("click", async () => {
+                        await updateTaskStatus(username, index, "completed");
+                        app.loadTasks(username); // Reload after update
+                    });
+                    taskItem.appendChild(completeBtn);
+                }
+
+                taskListContainer.appendChild(taskItem);
+            });
+        }
+
+        // Show the user's note
+        if (data.note) {
+            noteContainer.textContent = `Note: ${data.note}`;
+        }
     }
 };
 
