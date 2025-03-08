@@ -1,3 +1,4 @@
+// @ts-nocheck
 import FAJAX from "../../network/FAJAX.js";
 
 document.addEventListener("DOMContentLoaded", function () {

@@ -1,76 +1,95 @@
+// @ts-nocheck
 const app = {
-  init: function () {
-    // Handle form button navigation
-    document.querySelectorAll("form button").forEach((button) => {
-      button.addEventListener("click", app.handleNavigation);
-    });
+    init: function () {
+        // Create app container if it doesn't exist
+        if (!document.getElementById('app-container')) {
+            const container = document.createElement('div');
+            container.id = 'app-container';
+            document.body.appendChild(container);
+        }
+    
+        // Ensure the URL has #loginPage on first load if there's no hash
+        if (!location.hash) {
+            history.replaceState({ page: "loginPage" }, "", "#loginPage");
+        }
 
-    // Handle "Sign up" link navigation
-    document
-      .getElementById("signUpLink")
-      .addEventListener("click", function (event) {
-        event.preventDefault();
-        app.showPage("registerPage", true);
-      });
+        // Handle the initial page load based on hash
+        this.handleHashChange();
 
-    // Handle browser back/forward buttons
-    window.addEventListener("popstate", app.handlePopState);
+        // Handle form button navigation
+        document.addEventListener("submit", this.handleFormSubmit.bind(this));
 
-    // Handle hash change event
-    window.addEventListener("hashchange", app.handleHashChange);
+        // Handle "Sign up" link navigation
+        document.addEventListener("click", this.handleLinkClick.bind(this));
 
-    // Ensure the correct page is shown on initial load
-    app.handleHashChange();
+        // Handle browser back/forward buttons
+        window.addEventListener("popstate", this.handlePopState.bind(this));
 
-    // Ensure the URL has #loginPage on first load if there's no hash
-    if (!location.hash) {
-      history.replaceState({ page: "loginPage" }, "", "#loginPage");
+        // Handle hash change event
+        window.addEventListener("hashchange", this.handleHashChange.bind(this));
+    },
+  
+    handleFormSubmit: function (event) {
+        event.preventDefault(); // Prevent form submission
+        
+        const formId = event.target.id;
+        let targetPage = "";
+
+        if (formId === "register-form") {
+            // Validate registration form
+            const password = document.getElementById("register-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+            
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            // Send data to a server
+
+            targetPage = "loginPage"; // After register, go to login
+        } else if (formId === "login-form") {
+            // Validate login check with a server
+
+            targetPage = "tasksPage"; // After login, go to tasks
+        }
+        
+        if (targetPage) {
+            location.hash = targetPage; // This will trigger handleHashChange
+        }
+    },
+    
+    handleLinkClick: function (event) {
+        if (event.target.id === "signUpLink") {
+            event.preventDefault();
+            location.hash = "registerPage";
+        }
+    },
+  
+    showPage: function (pageId) {
+        let appContainer = document.getElementById('app-container');
+        appContainer.innerHTML = ""; // Clear previous content
+
+        let template = document.getElementById(pageId);
+        if (template) {
+            let content = template.content.cloneNode(true);
+            appContainer.appendChild(content);
+        } else {
+            console.error(`Template "${pageId}" not found`);
+        }
+    },
+  
+    handlePopState: function (event) {
+        // This handles browser back/forward navigation
+        this.showPage(location.hash.replace("#", "") || "loginPage");
+    },
+  
+    handleHashChange: function () {
+        // This handles both manual hash changes and programmatic ones
+        const pageId = location.hash.replace("#", "") || "loginPage";
+        this.showPage(pageId);
     }
-  },
-
-  handleNavigation: function (event) {
-    event.preventDefault(); // Prevent form submission
-
-    let targetPage = "";
-
-    if (event.target.closest("form").id === "register-form") {
-      targetPage = "loginPage"; // After register, go to login
-    } else if (event.target.closest("form").id === "login-form") {
-      targetPage = "tasksPage"; // After login, go to tasks
-    }
-
-    if (targetPage) {
-      app.showPage(targetPage, true);
-    }
-  },
-
-  showPage: function (pageId, addToHistory = true) {
-    document
-      .querySelectorAll(".page")
-      .forEach((div) => (div.style.display = "none")); // Hide all pages
-    let targetPage = document.getElementById(pageId);
-
-    if (targetPage) {
-      targetPage.style.display = "block"; // Show the target page
-
-      if (addToHistory) {
-        history.pushState({ page: pageId }, "", `#${pageId}`); // Update browser history
-      }
-    } else {
-      console.error(`Page ID "${pageId}" not found.`);
-    }
-  },
-
-  handlePopState: function (event) {
-    let page = event.state ? event.state.page : "loginPage"; // Default to loginPage
-    app.showPage(page, false);
-  },
-
-  handleHashChange: function () {
-    let page = location.hash.replace("#", "") || "loginPage";
-    app.showPage(page, false);
-  },
 };
-
+  
 // Initialize the SPA
-document.addEventListener("DOMContentLoaded", app.init);
+document.addEventListener("DOMContentLoaded", app.init.bind(app));
