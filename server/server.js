@@ -31,8 +31,6 @@ export function Post(url, data) {
   if (!Array.isArray(existingData)) {
     existingData = []; // אם זה לא מערך, נאתחל אותו למערך ריק
   }
-
-  // נוסיף את המשימה למערך
   existingData.push(data);
   // נשמור חזרה ל-localStorage
   localStorage.setItem(url, JSON.stringify(existingData));
@@ -51,16 +49,21 @@ export function Put(url, updatedItem) {
 export function Delete(url, itemId) {
   try {
     let parts = url.split("/");
-    let tasksPath = `/${parts[1]}`;
-    let storedData = JSON.parse(localStorage.getItem(tasksPath));
-    let taskObj = storedData.filter((task) => task.id === itemId);
-    if (taskObj) {
-      storedData = storedData.filter((task) => task.id !== itemId); // מסנן את המשימה עם ה-ID המתאים
-      localStorage.setItem(tasksPath, JSON.stringify(storedData));
-      console.log("Deleted task with ID:", itemId);
-      return { message: "Item deleted", taskId: itemId };
+    let dataPath = `/${parts[1]}`;
+    let storedData;
+    try {
+      storedData = JSON.parse(localStorage.getItem(dataPath));
+    } catch (error) {
+      console.error("Error parsing stored data:", error);
+      return { error: "Error parsing stored data" };
+    }
+    storedData = storedData.filter((item) => item.id !== itemId); // מסנן את הפריט עם ה-ID המתאים
+    if (storedData) {
+      localStorage.setItem(dataPath, JSON.stringify(storedData));
+      console.log("Deleted item with ID:", itemId);
+      return { message: "Item deleted", itemId: itemId };
     } else {
-      return { error: "No tasks found" };
+      return { error: "No items found" };
     }
   } catch (error) {
     console.error("Error deleting item:", error);

@@ -37,7 +37,8 @@ class FAJAX {
         this.status = 200;
       }
       this.readyState = request_status.done;
-      if (callback) callback(this.responseText);
+      if (callback) callback(); // whay need to pass this? why not just callback()?
+
     });
   }
 }

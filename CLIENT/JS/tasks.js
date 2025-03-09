@@ -8,7 +8,7 @@ let tasksPageInitialized = false;
 function initTasksPage() {
   // Prevent multiple initializations
   if (tasksPageInitialized) return;
-  
+
   const taskInput = document.getElementById("taskInput");
   const addTaskBtn = document.getElementById("addTask");
   const saveNotesBtn = document.getElementById("saveNotes");
@@ -19,7 +19,7 @@ function initTasksPage() {
     return; // Exit if elements aren't found
   }
 
-  addTaskBtn.addEventListener("click", function() {
+  addTaskBtn.addEventListener("click", function () {
     const taskText = taskInput.value.trim();
     if (!taskText) return; // Prevent adding empty tasks
 
@@ -36,7 +36,7 @@ function initTasksPage() {
   });
 
   if (saveNotesBtn && notesTextarea) {
-    saveNotesBtn.addEventListener("click", function() {
+    saveNotesBtn.addEventListener("click", function () {
       const notes = notesTextarea.value;
       NoteService.save(notes);
     });
@@ -45,7 +45,7 @@ function initTasksPage() {
   // Load tasks and notes when tasks page is shown
   TaskService.load();
   NoteService.load();
-  
+
   // Mark as initialized
   tasksPageInitialized = true;
   console.log("Tasks page initialized");
@@ -53,7 +53,7 @@ function initTasksPage() {
 
 // Reset initialization flag when leaving the tasks page
 function resetTasksPageInit() {
-  if (location.hash !== '#tasksPage') {
+  if (location.hash !== "#tasksPage") {
     tasksPageInitialized = false;
     console.log("Tasks page initialization reset");
   }
@@ -65,11 +65,11 @@ window.addEventListener("hashchange", resetTasksPageInit);
 // Create a MutationObserver to detect when the tasks page is loaded
 const observer = new MutationObserver((mutations) => {
   // Only proceed if we're on the tasks page and it's not yet initialized
-  if (location.hash === '#tasksPage' && !tasksPageInitialized) {
+  if (location.hash === "#tasksPage" && !tasksPageInitialized) {
     // Check if the necessary elements exist
     const taskInput = document.getElementById("taskInput");
     const addTaskBtn = document.getElementById("addTask");
-    
+
     if (taskInput && addTaskBtn) {
       // Allow a small delay for the DOM to settle
       setTimeout(initTasksPage, 50);
@@ -79,7 +79,7 @@ const observer = new MutationObserver((mutations) => {
 
 // Start observing the app container for changes
 document.addEventListener("DOMContentLoaded", () => {
-  const appContainer = document.getElementById('app-container');
+  const appContainer = document.getElementById("app-container");
   if (appContainer) {
     observer.observe(appContainer, { childList: true, subtree: true });
   }
@@ -92,53 +92,54 @@ const TaskService = {
 
     taskList.innerHTML = "";
     const xhr = new FAJAX();
-    xhr.send({ type: "GETALL", url: "/tasks" }, (response) => {
-      try {
-        const tasks = JSON.parse(response);
-        console.table(tasks);
-        tasks.forEach(TaskUI.add);
-      } catch (error) {
-        console.error("Error parsing tasks:", error);
-        alert("❌ Failed to load tasks. Please try again.");
+    xhr.send(
+      {
+        type: "GETALL",
+        url: "/tasks",
+      },
+      () => {
+        try {
+          const tasks = JSON.parse(xhr.responseText);
+          console.table(tasks);
+          tasks.forEach(TaskUI.add);
+        } catch (error) {
+          console.error("Error parsing tasks:", error);
+          alert("❌ Failed to load tasks. Please try again.");
+        }
       }
-    });
+    );
   },
 
   save(task, callback) {
     const xhr = new FAJAX();
-    xhr.send({ type: "POST", url: "/tasks", data: task }, (response) => {
-      try {
-        const res = JSON.parse(response);
-        callback(res && res.message === "Data received!");
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        alert("❌ Failed to save task. Please try again.");
-        callback(false);
+    xhr.send(
+      {
+        type: "POST",
+        url: "/tasks",
+        data: task,
+      },
+      () => {
+        callback(xhr.status === 200);
       }
-    });
+    );
   },
 
-  delete(task) {
+  delete(task, callback) {
     const xhr = new FAJAX();
     xhr.send(
-      { type: "DELETE", url: `/tasks/${task.id}`, data: task.id },
-      (response) => {
+      {
+        type: "DELETE",
+        url: `/tasks/${task.id}`,
+        data: task.id,
+      },
+      () => {
         if (xhr.status === 200 && xhr.readyState === 4) {
-          try {
-            const res = JSON.parse(response);
-            if (res && res.message === "Item deleted") {
-              console.log(`Task with ID ${task.id} deleted successfully.`);
-              this.load();
-            } else {
-              console.error(
-                `Failed to delete task with ID ${task.id}:`,
-                res.error
-              );
-            }
-          } catch (error) {
-            console.error("Error parsing delete response:", error);
-            alert("❌ Failed to delete task. Please try again.");
-          }
+          console.log(`Task with ID ${task.id} deleted successfully.`);
+          callback(true);
+        } else {
+          console.error("Error parsing delete response:", error);
+          alert("❌ Failed to delete task. Please try again.");
+          callback(false);
         }
       }
     );
@@ -153,21 +154,12 @@ const TaskService = {
         url: `/tasks/${task.id}`,
         data: task,
       },
-      (response) => {
+      () => {
         if (xhr.status === 200 && xhr.readyState === 4) {
           try {
-            const res = JSON.parse(response);
-            console.log("Update response:", res);
-
-            if (res && res.message === "Item updated") {
-              console.log(`Task with ID ${task.id} updated successfully.`);
-              this.load();
-            } else {
-              console.error(
-                `Failed to update task with ID ${task.id}:`,
-                res.error
-              );
-            }
+            console.log("Update response:", xhr.responseText);
+            console.log(`Task with ID ${task.id} updated successfully.`);
+            this.load();
           } catch (error) {
             console.error("Error parsing update response:", error);
           }
@@ -213,50 +205,94 @@ const TaskUI = {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-btn";
-    deleteButton.addEventListener("click", () => TaskService.delete(task));
-
+    deleteButton.addEventListener("click", () => {
+      TaskService.delete(task, (success) => {
+        if (success) {
+          taskItem.remove();
+        }
+      });
+    });
     taskItem.append(checkbox, taskText, editButton, deleteButton);
     taskList.appendChild(taskItem);
   },
 };
 
-// Add missing NoteService
+// NoteService
 const NoteService = {
   load() {
     const notesTextarea = document.querySelector(".notes");
-    if (!notesTextarea) return;
+    if (!notesTextarea) {
+      console.error("Notes textarea not found");
+      return;
+    }
 
     const xhr = new FAJAX();
-    xhr.send({ type: "GETALL", url: "/notes" }, (response) => {
-      try {
-        const notes = JSON.parse(response);
-        if (notes && notes.length > 0) {
-          notesTextarea.value = notes[0].text || "";
+    xhr.send(
+      {
+        type: "GETALL",
+        url: "/notes",
+      },
+      () => {
+        try {
+          const notes = JSON.parse(xhr.responseText);
+
+          if (notes && notes.length > 0) {
+            notesTextarea.value = notes[0].text || "";
+            return;
+          }
+
+          // Create empty note if none exists
+          this.createEmptyNote(notesTextarea);
+        } catch (error) {
+          console.error("Error parsing notes:", error);
+          alert("❌ Failed to load notes. Please try again.");
         }
-      } catch (error) {
-        console.error("Error parsing notes:", error);
       }
-    });
+    );
+  },
+
+  createEmptyNote(textarea) {
+    const emptyNote = { id: "user-notes", text: "" };
+    const xhr = new FAJAX();
+
+    xhr.send(
+      {
+        type: "POST",
+        url: "/notes",
+        data: emptyNote,
+      },
+      () => {
+        if (xhr.status === 200 && xhr.readyState === 4) {
+          console.log("Empty note created successfully");
+          textarea.value = "";
+        } else {
+          console.error("Failed to create empty note");
+          alert("❌ Failed to create note. Please try again.");
+        }
+      }
+    );
   },
 
   save(notesText) {
     const note = { id: "user-notes", text: notesText };
-    
+
     const xhr = new FAJAX();
-    xhr.send({ type: "POST", url: "/notes", data: note }, (response) => {
-      try {
-        const res = JSON.parse(response);
-        if (res && res.message === "Data received!") {
+    xhr.send(
+      {
+        type: "PUT",
+        url: "/notes",
+        data: note,
+      },
+      () => {
+        if (xhr.status === 200 && xhr.readyState === 4) {
           console.log("Notes saved successfully");
         } else {
           console.error("Failed to save notes");
+          alert("❌ Failed to save notes. Please try again.");
         }
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        alert("❌ Failed to save notes. Please try again.");
       }
-    });
-  }
+    );
+  },
 };
 
 // Export functions for global access if needed
