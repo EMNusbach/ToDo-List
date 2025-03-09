@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { sendRequest } from "./network.js";
 
 const request_status = Object.freeze({
