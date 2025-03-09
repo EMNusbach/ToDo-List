@@ -1,4 +1,4 @@
-import { GetAll, Get, Put, Post, Delete } from "../server/server.js";
+import { GetAll, Get, Put, Post, Delete } from "../SERVER/server.js";
 
 export function sendRequest(method, url, data, callback) {
   const delay = Math.random() * 2000 + 1000;

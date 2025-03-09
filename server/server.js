@@ -1,3 +1,4 @@
+// @ts-nocheck
 let all = [];
 
 export function GetAll(url) {
