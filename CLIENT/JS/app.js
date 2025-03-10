@@ -37,13 +37,13 @@ const app = {
 
         if (formId === "register-form") {
             // Validate registration form
-            const password = document.getElementById("register-password").value;
-            const confirmPassword = document.getElementById("confirm-password").value;
+            // const password = document.getElementById("register-password").value;
+            // const confirmPassword = document.getElementById("confirm-password").value;
             
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-                return;
-            }
+            // if (password !== confirmPassword) {
+            //     alert("Passwords do not match!");
+            //     return;
+            // }
 
             // Send data to a server
 

@@ -28,6 +28,8 @@
                     <label for="password">Password</label>
                     <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
                 </div>
+
+                <div id="login-error" className = "error-message"></div>
         
                 <button type="submit" class="btn">Sign In</button>
                 <p>Don't have an account? <a href="#registerPage" id="signUpLink">Sign up</a></p>
@@ -61,6 +63,9 @@
                     <label for="confirm-password">Confirm Password:</label>
                     <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
                 </div>
+
+                <div id="register-error" className = "error-message"></div>
+
                 <button type="submit" class="btn">Register</button> 
 
             </form>

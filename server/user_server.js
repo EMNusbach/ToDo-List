@@ -51,7 +51,7 @@ export function Get(url, credentials) {
 export function Post(url, data) {
     try {
       // Validate input
-      if (!data || !data.username || !data.email || !data.password) {
+      if (!data || !data.username || !data.email || !data.password ) {
         return { error: "Missing required fields", status: 400 };
       }
   
@@ -64,12 +64,6 @@ export function Post(url, data) {
       const usernameExists = existingUsers.some(user => user.username === data.username);
       if (usernameExists) {
         return { error: "Username already exists", status: 409 };
-      }
-      
-      // Check if email already exists
-      const emailExists = existingUsers.some(user => user.email === data.email);
-      if (emailExists) {
-        return { error: "Email already exists", status: 409 };
       }
   
       // Create new user object
