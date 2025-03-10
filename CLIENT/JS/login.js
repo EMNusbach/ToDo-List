@@ -1,23 +1,12 @@
 // @ts-nocheck
 import FAJAX from "../../network/FAJAX.js";
 
-// Track if the login page has been initialized
-let loginPageInitialized = false;
-
-// Main initialization function that works with SPA structure
-function initLoginPage() {
-  // Prevent multiple initializations
-  if (loginPageInitialized) return;
+// Main initialization function 
+export function initLoginPage() {
 
   const loginForm = document.getElementById("login-form");
   const usernameInput = document.getElementById("login-username");
   const passwordInput = document.getElementById("login-password");
-  const registerError = document.getElementById("login-error"); 
-
-  // Hide any error messages initially
-  if (loginError) {
-    loginError.style.display = "none";
-  }
 
   loginForm.addEventListener("submit", function(event) {
     event.preventDefault();
@@ -39,71 +28,41 @@ function initLoginPage() {
     // Attempt login
     AuthService.login(credentials, (success, userData) => {
       if (success) {
-        // Clear form
-        loginForm.reset();
-        
-        // Store user data in sessionStorage
-        sessionStorage.setItem("currentUser", JSON.stringify(userData));
-        
-        // Redirect to tasks page
-        window.location.hash = "#tasksPage";
+
+        loginForm.reset(); // Clear form
+        sessionStorage.setItem("currentUser", JSON.stringify(userData)); // Store user data in sessionStorage
+        window.location.hash = "#tasksPage";  // Redirect to tasks page
+
       } else {
         displayLoginError("Invalid username or password");
       }
     });
   });
-
-  // Helper function to display login errors
-  function displayLoginError(message) {
-    if (loginError) {
-      loginError.textContent = message;
-      loginError.style.display = "block";
-    } else {
-      alert(`❌ ${message}`);
-    }
-  }
-
-  // Mark as initialized
-  loginPageInitialized = true;
-  console.log("Login page initialized");
 }
 
-// Reset initialization flag when leaving the login page
-function resetLoginPageInit() {
-  if (location.hash !== "#loginPage") {
-    loginPageInitialized = false;
-    console.log("Login page initialization reset");
+// Helper function to display login errors
+function displayLoginError(message) {
+  const loginError = document.getElementById("login-error"); 
+  if (loginError) {
+    loginError.textContent = message;
+    loginError.style.display = "block";
+  } else {
+    alert(`❌ ${message}`);
   }
 }
 
-// Listen for hash changes to reset initialization when leaving login page
-window.addEventListener("hashchange", resetLoginPageInit);
-
-// Create a MutationObserver to detect when the login page is loaded
-const observer = new MutationObserver((mutations) => {
-  // Only proceed if we're on the login page and it's not yet initialized
-  if (location.hash === "#loginPage" && !loginPageInitialized) {
-    // Check if the necessary elements exist
-    const loginForm = document.getElementById("login-form");
-
-    if (loginForm) {
-      // Allow a small delay for the DOM to settle
-      setTimeout(initLoginPage, 50);
-    }
-  }
-});
-
-// Start observing the app container for changes
-document.addEventListener("DOMContentLoaded", () => {
-  const appContainer = document.getElementById("app-container");
-  if (appContainer) {
-    observer.observe(appContainer, { childList: true, subtree: true });
-  }
-});
 
 // Authentication Service
 const AuthService = {
   login(credentials, callback) {
+
+    // Validate credentials before sending request
+    if (!credentials.username || !credentials.password) {
+      console.error("Missing username or password");
+      callback(false);
+      return;
+    }
+
     const xhr = new FAJAX();
     xhr.send(
       {
@@ -119,7 +78,7 @@ const AuthService = {
             console.log("Login successful:", response.user.username);
             callback(true, response.user);
           } else {
-            console.error("Login failed:", response.error);
+            console.error("Login failed:", response.message || "Unknown error");
             callback(false);
           }
         } catch (error) {
@@ -129,28 +88,7 @@ const AuthService = {
       }
     );
   },
-
-//   logout() {
-//     // Remove user data from session storage
-//     sessionStorage.removeItem("currentUser");
-    
-//     // Redirect to login page
-//     window.location.hash = "#loginPage";
-//     console.log("User logged out successfully");
-//   },
-  
-//   isLoggedIn() {
-//     return sessionStorage.getItem("currentUser") !== null;
-//   },
-  
-//   getCurrentUser() {
-//     const userData = sessionStorage.getItem("currentUser");
-//     return userData ? JSON.parse(userData) : null;
-//   }
 };
 
-// Export functions for global access if needed
+// Export the auth service for global access if needed
 window.login = AuthService.login;
-// window.logout = AuthService.logout;
-// window.isLoggedIn = AuthService.isLoggedIn;
-// window.getCurrentUser = AuthService.getCurrentUser;

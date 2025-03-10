@@ -1,7 +1,11 @@
 // @ts-nocheck
+export function handleRequest(methode, url, data){
 
+
+
+}
 //Retrieves all items from a specified collection in localStorage
-export function GetAll(url) {
+export function user_GetAll(url) {
     try {
       const storedData = localStorage.getItem(url);
       return storedData ? JSON.parse(storedData) : [];
@@ -13,7 +17,7 @@ export function GetAll(url) {
   
 
 //Gets a specific user from localStorage for login
-export function Get(url, credentials) {
+export function user_Get(url, credentials) {
     try {
         // Validate input
         if (!credentials || !credentials.username || !credentials.password) {
@@ -21,7 +25,7 @@ export function Get(url, credentials) {
         }
 
         // Get users from localStorage
-        const users = GetAll(url);
+        const users = user_GetAll(url);
         
         // Find matching user
         const user = users.find(u => 
@@ -48,7 +52,7 @@ export function Get(url, credentials) {
   
 
 //Adds a new user to localStorage
-export function Post(url, data) {
+export function user_Post(url, data) {
     try {
       // Validate input
       if (!data || !data.username || !data.email || !data.password ) {
@@ -58,7 +62,7 @@ export function Post(url, data) {
       console.log("Registering user:", data.username);
       
       // Load existing users
-      const existingUsers = GetAll(url);
+      const existingUsers = user_GetAll(url);
   
       // Check if username already exists
       const usernameExists = existingUsers.some(user => user.username === data.username);

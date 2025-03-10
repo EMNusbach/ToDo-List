@@ -1,7 +1,7 @@
 // @ts-nocheck
 let all = [];
 
-export function GetAll(url) {
+export function task_GetAll(url) {
   let all = []; // מאפס את הרשימה בכל קריאה
   try {
     const storedData = localStorage.getItem(url);
@@ -14,7 +14,7 @@ export function GetAll(url) {
   return all;
 }
 
-export function Get(url) {
+export function task_Get(url) {
   for (let i = 0; i < localStorage.length; i++) {
     if (localStorage.key(i) === url) {
       return JSON.parse(localStorage.getItem(url));
@@ -23,7 +23,7 @@ export function Get(url) {
   return { error: "Not found" };
 }
 
-export function Post(url, data) {
+export function task_Post(url, data) {
   console.log("Received data:", data);
 
   // נטען את הנתונים הקיימים ונוודא שזה מערך
@@ -38,15 +38,15 @@ export function Post(url, data) {
   return { message: "Data received!", data };
 }
 
-export function Put(url, updatedItem) {
-  Delete(url, updatedItem.id);
+export function task_Put(url, updatedItem) {
+  task_Delete(url, updatedItem.id);
   let parts = url.split("/");
   let tasksPath = `/${parts[1]}`;
-  Post(tasksPath, updatedItem);
+  task_Post(tasksPath, updatedItem);
   return { message: "Item updated", updatedTask: updatedItem };
 }
 
-export function Delete(url, itemId) {
+export function task_Delete(url, itemId) {
   try {
     let parts = url.split("/");
     let dataPath = `/${parts[1]}`;

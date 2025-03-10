@@ -1,64 +1,26 @@
 // @ts-nocheck
+
+import { initLoginPage } from "./login.js";
+import { initRegisterPage } from "./register.js"
+console.log("im in app.js");
 const app = {
     init: function () {
-        // Create app container if it doesn't exist
-        if (!document.getElementById('app-container')) {
-            const container = document.createElement('div');
-            container.id = 'app-container';
-            document.body.appendChild(container);
-        }
     
-        // Ensure the URL has #loginPage on first load if there's no hash
+         // Set default page to login if no hash
         if (!location.hash) {
             history.replaceState({ page: "loginPage" }, "", "#loginPage");
         }
 
-        // Handle the initial page load based on hash
+        // Handle initial page load
         this.handleHashChange();
-
-        // Handle form button navigation
-        document.addEventListener("submit", this.handleFormSubmit.bind(this));
 
         // Handle "Sign up" link navigation
         document.addEventListener("click", this.handleLinkClick.bind(this));
 
-        // Handle browser back/forward buttons
-        window.addEventListener("popstate", this.handlePopState.bind(this));
-
-        // Handle hash change event
+        // Handle hash changes (including back/forward navigation)
         window.addEventListener("hashchange", this.handleHashChange.bind(this));
     },
-  
-    handleFormSubmit: function (event) {
-        event.preventDefault(); // Prevent form submission
-        
-        const formId = event.target.id;
-        let targetPage = "";
 
-        if (formId === "register-form") {
-            // Validate registration form
-            // const password = document.getElementById("register-password").value;
-            // const confirmPassword = document.getElementById("confirm-password").value;
-            
-            // if (password !== confirmPassword) {
-            //     alert("Passwords do not match!");
-            //     return;
-            // }
-
-            // Send data to a server
-
-            targetPage = "loginPage"; // After register, go to login
-        } else if (formId === "login-form") {
-            // Validate login check with a server
-
-            targetPage = "tasksPage"; // After login, go to tasks
-        }
-        
-        if (targetPage) {
-            location.hash = targetPage; // This will trigger handleHashChange
-        }
-    },
-    
     handleLinkClick: function (event) {
         if (event.target.id === "signUpLink") {
             event.preventDefault();
@@ -74,18 +36,35 @@ const app = {
         if (template) {
             let content = template.content.cloneNode(true);
             appContainer.appendChild(content);
+
+            this.initPageScripts(pageId); // Initialize page-specific scripts after content is added to DOM
         } else {
             console.error(`Template "${pageId}" not found`);
         }
     },
-  
-    handlePopState: function (event) {
-        // This handles browser back/forward navigation
-        this.showPage(location.hash.replace("#", "") || "loginPage");
+
+    initPageScripts: function(pageId) {
+
+        // Call specific initializers based on the current page
+        switch(pageId) {
+            case "registerPage":
+                if (typeof initRegisterPage === 'function') {
+                    initRegisterPage();
+                }
+                break;
+            case "loginPage":
+                console.log("im in app login app.js")
+                if (typeof initLoginPage === 'function') {
+                    initLoginPage();
+                }
+                break;
+            case "tasksPage":
+                // If you have tasks-specific JS initialization
+                break;
+        }
     },
   
     handleHashChange: function () {
-        // This handles both manual hash changes and programmatic ones
         const pageId = location.hash.replace("#", "") || "loginPage";
         this.showPage(pageId);
     }
