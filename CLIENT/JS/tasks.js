@@ -1,94 +1,153 @@
 // @ts-nocheck
 import FAJAX from "../../network/FAJAX.js";
 
-// Track if the tasks page has been initialized
-let tasksPageInitialized = false;
+/**
+ * Tasks Page Controller
+ * Manages the task list functionality with improved organization
+ */
+class TasksPageController {
+  constructor() {
+    this.initialized = false;
+    this.elements = {
+      taskInput: null,
+      addTaskBtn: null,
+      saveNotesBtn: null,
+      notesTextarea: null,
+      taskList: null,
+    };
 
-// Main initialization that works with SPA structure
-function initTasksPage() {
-  // Prevent multiple initializations
-  if (tasksPageInitialized) return;
+    // Bind methods to maintain 'this' context
+    this.init = this.init.bind(this);
+    this.reset = this.reset.bind(this);
+    this.setupEventListeners = this.setupEventListeners.bind(this);
 
-  const taskInput = document.getElementById("taskInput");
-  const addTaskBtn = document.getElementById("addTask");
-  const saveNotesBtn = document.getElementById("saveNotes");
-  const notesTextarea = document.querySelector(".notes");
-
-  if (!taskInput || !addTaskBtn) {
-    console.error("Task page elements not found");
-    return; // Exit if elements aren't found
-  }
-
-  addTaskBtn.addEventListener("click", function () {
-    const taskText = taskInput.value.trim();
-    if (!taskText) return; // Prevent adding empty tasks
-
-    const task = { id: Date.now(), text: taskText, isCompleted: false };
-
-    TaskService.save(task, (success) => {
-      if (success) {
-        TaskUI.add(task);
-        taskInput.value = "";
-      } else {
-        alert("❌ Failed to save task. Please try again.");
+    // Setup page lifecycle handlers
+    window.addEventListener("hashchange", this.reset);
+    document.addEventListener("DOMContentLoaded", () => {
+      const appContainer = document.getElementById("app-container");
+      if (appContainer) {
+        const observer = new MutationObserver(this.handleDOMChanges.bind(this));
+        observer.observe(appContainer, { childList: true, subtree: true });
       }
     });
-  });
-
-  if (saveNotesBtn && notesTextarea) {
-    saveNotesBtn.addEventListener("click", function () {
-      const notes = notesTextarea.value;
-      NoteService.save(notes);
-    });
   }
 
-  // Load tasks and notes when tasks page is shown
-  TaskService.load();
-  NoteService.load();
+  /**
+   * Initialize the tasks page
+   */
+  init() {
+    if (this.initialized) return;
 
-  // Mark as initialized
-  tasksPageInitialized = true;
-  console.log("Tasks page initialized");
-}
+    // Cache DOM elements
+    this.elements = {
+      taskInput: document.getElementById("taskInput"),
+      addTaskBtn: document.getElementById("addTask"),
+      saveNotesBtn: document.getElementById("saveNotes"),
+      notesTextarea: document.querySelector(".notes"),
+      taskList: document.getElementById("taskList"),
+    };
 
-// Reset initialization flag when leaving the tasks page
-function resetTasksPageInit() {
-  if (location.hash !== "#tasksPage") {
-    tasksPageInitialized = false;
-    console.log("Tasks page initialization reset");
+    if (!this.elements.taskInput || !this.elements.addTaskBtn) {
+      console.error("Task page elements not found");
+      return;
+    }
+
+    this.setupEventListeners();
+
+    // Load initial data
+    taskService.load();
+    noteService.load();
+
+    this.initialized = true;
+    console.log("Tasks page initialized");
   }
-}
 
-// Listen for hash changes to reset initialization when leaving tasks page
-window.addEventListener("hashchange", resetTasksPageInit);
-
-// Create a MutationObserver to detect when the tasks page is loaded
-const observer = new MutationObserver((mutations) => {
-  // Only proceed if we're on the tasks page and it's not yet initialized
-  if (location.hash === "#tasksPage" && !tasksPageInitialized) {
-    // Check if the necessary elements exist
-    const taskInput = document.getElementById("taskInput");
-    const addTaskBtn = document.getElementById("addTask");
-
-    if (taskInput && addTaskBtn) {
-      // Allow a small delay for the DOM to settle
-      setTimeout(initTasksPage, 50);
+  /**
+   * Reset initialization when leaving the tasks page
+   */
+  reset() {
+    if (location.hash !== "#tasksPage") {
+      this.initialized = false;
+      console.log("Tasks page initialization reset");
     }
   }
-});
 
-// Start observing the app container for changes
-document.addEventListener("DOMContentLoaded", () => {
-  const appContainer = document.getElementById("app-container");
-  if (appContainer) {
-    observer.observe(appContainer, { childList: true, subtree: true });
+  /**
+   * Setup all event listeners
+   */
+  setupEventListeners() {
+    // Add task handler
+    this.elements.addTaskBtn.addEventListener("click", () => {
+      const taskText = this.elements.taskInput.value.trim();
+      if (!taskText) return;
+
+      const task = { id: Date.now(), text: taskText, isCompleted: false };
+      taskService.save(task, (success) => {
+        if (success) {
+          taskUI.add(task);
+          this.elements.taskInput.value = "";
+        } else {
+          alert("❌ Failed to save task. Please try again.");
+        }
+      });
+    });
+
+    // Save notes handler
+    if (this.elements.saveNotesBtn && this.elements.notesTextarea) {
+      this.elements.saveNotesBtn.addEventListener("click", () => {
+        const notes = this.elements.notesTextarea.value;
+        noteService.save(notes);
+      });
+    }
   }
-});
 
-const TaskService = {
+  /**
+   * Handle DOM mutations to initialize page when elements are available
+   */
+  handleDOMChanges(mutations) {
+    if (location.hash === "#tasksPage" && !this.initialized) {
+      const taskInput = document.getElementById("taskInput");
+      const addTaskBtn = document.getElementById("addTask");
+
+      if (taskInput && addTaskBtn) {
+        // Small delay for DOM to settle
+        setTimeout(this.init, 50);
+      }
+    }
+  }
+}
+
+/**
+ * Task Service
+ * Handles task data operations with the server
+ */
+const taskService = {
+  // load() {
+  //   const taskList = document.getElementById("taskList");
+  //   if (!taskList) return;
+
+  //   taskList.innerHTML = "";
+  //   const xhr = new FAJAX();
+  //   xhr.send(
+  //     {
+  //       type: "GETALL",
+  //       url: "/tasks",
+  //     },
+  //     () => {
+  //       try {
+  //         const tasks = JSON.parse(xhr.responseText);
+  //         console.log("Tasks loaded:", tasks.length);
+  //         tasks.forEach(taskUI.add);
+  //       } catch (error) {
+  //         console.error("Error parsing tasks:", error);
+  //         alert("❌ Failed to load tasks. Please try again.");
+  //       }
+  //     }
+  //   );
+  // },
   load() {
     const taskList = document.getElementById("taskList");
-    if (!taskList) return; // Exit if element not found
+    if (!taskList) return;
 
     taskList.innerHTML = "";
     const xhr = new FAJAX();
@@ -100,8 +159,23 @@ const TaskService = {
       () => {
         try {
           const tasks = JSON.parse(xhr.responseText);
-          console.table(tasks);
-          tasks.forEach(TaskUI.add);
+          console.log("Tasks loaded:", tasks.length);
+
+          // Display existing tasks
+          tasks.forEach(taskUI.add);
+
+          // Add empty task slots until we have 10 total
+          const remainingSlots = 10 - tasks.length;
+          if (remainingSlots > 0) {
+            for (let i = 0; i < remainingSlots; i++) {
+              const emptyTask = {
+                id: `${Date.now()}-${i}`,
+                text: "",
+                isCompleted: false,
+              };
+              taskUI.add(emptyTask);
+            }
+          }
         } catch (error) {
           console.error("Error parsing tasks:", error);
           alert("❌ Failed to load tasks. Please try again.");
@@ -118,36 +192,33 @@ const TaskService = {
         url: "/tasks",
         data: task,
       },
-      () => {
-        callback(xhr.status === 200);
-      }
+      () => callback(xhr.status === 200)
     );
   },
 
-  delete(task, callback) {
+  delete(taskId, callback) {
     const xhr = new FAJAX();
     xhr.send(
       {
         type: "DELETE",
-        url: `/tasks/${task.id}`,
-        data: task.id,
+        url: `/tasks/${taskId}`,
+        data: taskId,
       },
       () => {
-        if (xhr.status === 200 && xhr.readyState === 4) {
-          console.log(`Task with ID ${task.id} deleted successfully.`);
-          callback(true);
+        const success = xhr.status === 200 && xhr.readyState === 4;
+        if (success) {
+          console.log(`Task with ID ${taskId} deleted successfully.`);
         } else {
-          console.error("Error parsing delete response:", error);
+          console.error("Failed to delete task");
           alert("❌ Failed to delete task. Please try again.");
-          callback(false);
         }
+        callback(success);
       }
     );
   },
 
   update(task) {
     const xhr = new FAJAX();
-    console.log("Updating task:", task);
     xhr.send(
       {
         type: "PUT",
@@ -156,75 +227,174 @@ const TaskService = {
       },
       () => {
         if (xhr.status === 200 && xhr.readyState === 4) {
-          try {
-            console.log("Update response:", xhr.responseText);
-            console.log(`Task with ID ${task.id} updated successfully.`);
-            this.load();
-          } catch (error) {
-            console.error("Error parsing update response:", error);
-          }
+          console.log(`Task with ID ${task.id} updated successfully.`);
+          this.load();
+        } else {
+          console.error("Failed to update task");
         }
       }
     );
   },
 };
 
-const TaskUI = {
+/**
+ * Task UI
+ * Handles the display and UI interactions for tasks
+ */
+// const taskUI = {
+//   add(task) {
+//     const taskList = document.getElementById("taskList");
+//     if (!taskList) return;
+
+//     const taskItem = document.createElement("li");
+//     taskItem.dataset.taskId = task.id;
+
+//     // Create checkbox
+//     const checkbox = document.createElement("input");
+//     checkbox.type = "checkbox";
+//     checkbox.className = "task-checkbox";
+//     checkbox.checked = task.isCompleted;
+//     checkbox.addEventListener("change", () => {
+//       task.isCompleted = checkbox.checked;
+//       taskText.style.textDecoration = task.isCompleted
+//         ? "line-through"
+//         : "none";
+//       taskService.update(task);
+//     });
+
+//     // Create task text
+//     const taskText = document.createElement("span");
+//     taskText.textContent = task.text;
+//     taskText.style.textDecoration = task.isCompleted ? "line-through" : "none";
+//     taskText.style.cursor = "pointer"; // Add pointer cursor to indicate clickable
+
+//     // uptate when double click
+//     taskText.addEventListener("dblclick", () => {
+//       const newTaskText = prompt("Edit task:", task.text);
+//       if (newTaskText && newTaskText.trim()) {
+//         task.text = newTaskText.trim();
+//         taskText.textContent = task.text;
+//         taskService.update(task);
+//       }
+//     });
+
+//     // Create edit button
+//     const editButton = document.createElement("button");
+//     editButton.textContent = "Edit";
+//     editButton.className = "edit-btn";
+//     editButton.addEventListener("click", () => {
+//       const newTaskText = prompt("Edit task:", task.text);
+//       if (newTaskText && newTaskText.trim()) {
+//         task.text = newTaskText.trim();
+//         taskText.textContent = task.text;
+//         taskService.update(task);
+//       }
+//     });
+
+//     // Create delete button
+//     const deleteButton = document.createElement("button");
+//     deleteButton.textContent = "Delete";
+//     deleteButton.className = "delete-btn";
+//     deleteButton.addEventListener("click", () => {
+//       taskService.delete(task.id, (success) => {
+//         if (success) {
+//           taskItem.remove();
+//         }
+//       });
+//     });
+
+//     // Add elements to the list item
+//     taskItem.append(checkbox, taskText);
+//     if (task.text) {
+//       taskItem.append(editButton, deleteButton);
+//     }
+//     taskList.appendChild(taskItem);
+//   },
+// };
+const taskUI = {
   add(task) {
     const taskList = document.getElementById("taskList");
-    if (!taskList) return; // Skip if element not found
+    if (!taskList) return;
 
     const taskItem = document.createElement("li");
+    taskItem.dataset.taskId = task.id;
 
+    // Create checkbox
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "task-checkbox";
     checkbox.checked = task.isCompleted;
     checkbox.addEventListener("change", () => {
       task.isCompleted = checkbox.checked;
-      TaskService.update(task);
+      taskText.style.textDecoration = task.isCompleted
+        ? "line-through"
+        : "none";
+      taskService.update(task);
     });
 
+    // Create task text
     const taskText = document.createElement("span");
     taskText.textContent = task.text;
-    if (task.isCompleted) {
-      taskText.style.textDecoration = "line-through";
-    }
+    taskText.style.textDecoration = task.isCompleted ? "line-through" : "none";
+    taskText.style.cursor = "pointer";
+    taskText.className = "task-text";
 
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.className = "edit-btn";
-    editButton.addEventListener("click", () => {
-      const newTaskText = prompt("Edit task:", taskText.textContent);
-      if (newTaskText) {
-        task.text = newTaskText;
-        TaskService.update(task);
-      }
+    // Enable inline editing on double click
+    taskText.addEventListener("dblclick", () => {
+      // Create input element
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = task.text;
+      input.className = "task-edit-input";
+
+      // Replace span with input
+      taskText.replaceWith(input);
+      input.focus();
+
+      // Handle Enter key press
+      input.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+          const newText = input.value.trim();
+          if (newText) {
+            task.text = newText;
+            taskService.update(task);
+          }
+        }
+      });
+
+      // Handle clicking outside the input
+      input.addEventListener("blur", () => {
+        input.replaceWith(taskText);
+      });
     });
 
+    // Create delete button
     const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
     deleteButton.className = "delete-btn";
     deleteButton.addEventListener("click", () => {
-      TaskService.delete(task, (success) => {
+      taskService.delete(task.id, (success) => {
         if (success) {
           taskItem.remove();
         }
       });
     });
-    taskItem.append(checkbox, taskText, editButton, deleteButton);
+
+    // Add elements to the list item
+    taskItem.append(checkbox, taskText);
+    if (task.text) {
+      taskItem.append(deleteButton);
+    }
     taskList.appendChild(taskItem);
   },
 };
-
-// NoteService
-const NoteService = {
+/**
+ * Notes Service
+ * Handles note data operations with the server
+ */
+const noteService = {
   load() {
     const notesTextarea = document.querySelector(".notes");
-    if (!notesTextarea) {
-      console.error("Notes textarea not found");
-      return;
-    }
+    if (!notesTextarea) return;
 
     const xhr = new FAJAX();
     xhr.send(
@@ -235,7 +405,6 @@ const NoteService = {
       () => {
         try {
           const notes = JSON.parse(xhr.responseText);
-
           if (notes && notes.length > 0) {
             notesTextarea.value = notes[0].text || "";
             return;
@@ -275,8 +444,8 @@ const NoteService = {
 
   save(notesText) {
     const note = { id: "user-notes", text: notesText };
-
     const xhr = new FAJAX();
+
     xhr.send(
       {
         type: "PUT",
@@ -295,6 +464,9 @@ const NoteService = {
   },
 };
 
+// Initialize TasksPageController
+const tasksPageController = new TasksPageController();
+
 // Export functions for global access if needed
-window.loadNotes = NoteService.load;
-window.loadTasks = TaskService.load;
+window.loadNotes = noteService.load;
+window.loadTasks = taskService.load;

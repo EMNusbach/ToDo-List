@@ -95,6 +95,37 @@ input:focus {
     transform: scale(1.03);
 }
 
+.delete-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    background-image: url('https://img.icons8.com/?size=100&id=FC0asmJ5yvo4&format=png&color=000000');
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease;
+}
+
+.delete-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Remove outline on focus */
+.delete-btn:focus {
+    outline: none;
+}
+
+.task-checkbox {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 10px;
+    accent-color: #f3b092;  
+      border-radius: 4px;
+}
 
 /* Link Styling */
 a {
@@ -107,18 +138,6 @@ a:hover {
 }
 
 
-/* Tasks Styling*/
-
-/* .border-container {
-    background-image: url('../IMG/tasks-border.png'); 
-    background-size: cover;
-    background-repeat: no-repeat;
-    padding: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px; 
-} */
 
 .section-title { 
     background-color: #f58651;
@@ -158,6 +177,21 @@ a:hover {
     font-size: 16px;
     padding: 5px;
     width: 100%;
+    cursor: pointer;
+    padding: 2px 5px;
+    min-width: 200px;
+    display: inline-block;
+}
+
+.task-edit-input {
+    height: auto;
+    border: none;
+    border-bottom: 2px solid #007bff;
+    background: transparent;
+}
+.task-text:hover {
+    background-color: #f0f0f0;
+    border-radius: 3px;
 }
 
 .completed {

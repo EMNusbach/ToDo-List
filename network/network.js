@@ -1,5 +1,11 @@
 // import { GetAll, Get, Put, Post, Delete } from "../SERVER/server.js";
-import { task_GetAll, task_Get, task_Put, task_Post, task_Delete } from "../SERVER/task_server.js";
+import {
+  task_GetAll,
+  task_Get,
+  task_Put,
+  task_Post,
+  task_Delete,
+} from "../SERVER/task_server.js";
 import { user_GetAll, user_Get, user_Post } from "../SERVER/user_server.js";
 
 export function sendRequest(method, url, data, callback) {
@@ -15,7 +21,21 @@ export function sendRequest(method, url, data, callback) {
 
     let response;
 
-    if(url === "/tasks" || url === "/notes"){
+    if (url === "/users") {
+      switch (method) {
+        case "GETALL":
+          response = user_GetAll(url);
+          break;
+        case "GET":
+          response = user_Get(url, data);
+          break;
+        case "POST":
+          response = user_Post(url, data);
+          break;
+        default:
+          return callback("Unsupported method", null);
+      }
+    } else {
       switch (method) {
         case "GETALL":
           response = task_GetAll(url);
@@ -36,49 +56,31 @@ export function sendRequest(method, url, data, callback) {
           return callback("Unsupported method", null);
       }
     }
-  
-    if(url === "/users"){
-      switch (method) {
-        case "GETALL":
-          response = user_GetAll(url);
-          break;
-        case "GET":
-          response = user_Get(url, data);
-          break;
-        case "POST":
-          response = user_Post(url, data);
-          break;
-        default:
-          return callback("Unsupported method", null);
-      }
-  
-    }
 
     callback(null, JSON.stringify(response));
   }, delay);
 }
 
-    // let response;
-    // switch (method) {
-    //   case "GETALL":
-    //     response = GetAll(url);
-    //     break;
-    //   case "GET":
-    //     response = Get(url, data)
-    //     //response = Get(url);
-    //     break;
-    //   case "POST":
-    //     response = Post(url, data);
-    //     break;
-    //   // case "PUT":
-    //   //   response = Put(url, data);
-    //   //   break;
-    //   // case "DELETE":
-    //   //   response = Delete(url, data);
-    //   //   break;
-    //   default:
-    //     return callback("Unsupported method", null);
-    // }
+// let response;
+// switch (method) {
+//   case "GETALL":
+//     response = GetAll(url);
+//     break;
+//   case "GET":
+//     response = Get(url, data)
+//     //response = Get(url);
+//     break;
+//   case "POST":
+//     response = Post(url, data);
+//     break;
+//   // case "PUT":
+//   //   response = Put(url, data);
+//   //   break;
+//   // case "DELETE":
+//   //   response = Delete(url, data);
+//   //   break;
+//   default:
+//     return callback("Unsupported method", null);
+// }
 
-    // מחזירים את התשובה אחרי הסימולציה
-
+// מחזירים את התשובה אחרי הסימולציה
