@@ -9,7 +9,7 @@ class TasksPageController {
   constructor() {
     this.initialized = false;
     this.elements = {
-      taskInput: null,
+      // taskInput: null,
       addTaskBtn: null,
       saveNotesBtn: null,
       notesTextarea: null,
@@ -40,14 +40,14 @@ class TasksPageController {
 
     // Cache DOM elements
     this.elements = {
-      taskInput: document.getElementById("taskInput"),
+      // taskInput: document.getElementById("taskInput"),
       addTaskBtn: document.getElementById("addTask"),
       saveNotesBtn: document.getElementById("saveNotes"),
       notesTextarea: document.querySelector(".notes"),
       taskList: document.getElementById("taskList"),
     };
 
-    if (!this.elements.taskInput || !this.elements.addTaskBtn) {
+    if (!this.elements.addTaskBtn) {
       console.error("Task page elements not found");
       return;
     }
@@ -78,25 +78,20 @@ class TasksPageController {
   setupEventListeners() {
     // Add task handler
     this.elements.addTaskBtn.addEventListener("click", () => {
-      const taskText = this.elements.taskInput.value.trim();
-      if (!taskText) return;
-
-      const task = { id: Date.now(), text: taskText, isCompleted: false };
-      taskService.save(task, (success) => {
-        if (success) {
-          taskUI.add(task);
-          this.elements.taskInput.value = "";
-        } else {
-          alert("❌ Failed to save task. Please try again.");
-        }
-      });
+      // const taskText = this.elements.taskInput.value.trim();
+      // add an empty task
+      taskService.addEmptyTask();
     });
 
     // Save notes handler
-    if (this.elements.saveNotesBtn && this.elements.notesTextarea) {
-      this.elements.saveNotesBtn.addEventListener("click", () => {
-        const notes = this.elements.notesTextarea.value;
-        noteService.save(notes);
+    if (this.elements.notesTextarea) {
+      // Save on Enter key (Ctrl+Enter or Shift+Enter to add new line)
+      this.elements.notesTextarea.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey) {
+          e.preventDefault(); // Prevent new line
+          const notes = this.elements.notesTextarea.value;
+          noteService.save(notes);
+        }
       });
     }
   }
@@ -106,10 +101,10 @@ class TasksPageController {
    */
   handleDOMChanges(mutations) {
     if (location.hash === "#tasksPage" && !this.initialized) {
-      const taskInput = document.getElementById("taskInput");
+      //   const taskInput = document.getElementById("taskInput");
       const addTaskBtn = document.getElementById("addTask");
 
-      if (taskInput && addTaskBtn) {
+      if (addTaskBtn) {
         // Small delay for DOM to settle
         setTimeout(this.init, 50);
       }
@@ -122,29 +117,15 @@ class TasksPageController {
  * Handles task data operations with the server
  */
 const taskService = {
-  // load() {
-  //   const taskList = document.getElementById("taskList");
-  //   if (!taskList) return;
+  addEmptyTask() {
+    const emptyTask = {
+      id: `${Date.now()}`,
+      text: "",
+      isCompleted: false,
+    };
+    taskUI.add(emptyTask);
+  },
 
-  //   taskList.innerHTML = "";
-  //   const xhr = new FAJAX();
-  //   xhr.send(
-  //     {
-  //       type: "GETALL",
-  //       url: "/tasks",
-  //     },
-  //     () => {
-  //       try {
-  //         const tasks = JSON.parse(xhr.responseText);
-  //         console.log("Tasks loaded:", tasks.length);
-  //         tasks.forEach(taskUI.add);
-  //       } catch (error) {
-  //         console.error("Error parsing tasks:", error);
-  //         alert("❌ Failed to load tasks. Please try again.");
-  //       }
-  //     }
-  //   );
-  // },
   load() {
     const taskList = document.getElementById("taskList");
     if (!taskList) return;
@@ -165,15 +146,10 @@ const taskService = {
           tasks.forEach(taskUI.add);
 
           // Add empty task slots until we have 10 total
-          const remainingSlots = 10 - tasks.length;
+          const remainingSlots = 8 - tasks.length;
           if (remainingSlots > 0) {
             for (let i = 0; i < remainingSlots; i++) {
-              const emptyTask = {
-                id: `${Date.now()}-${i}`,
-                text: "",
-                isCompleted: false,
-              };
-              taskUI.add(emptyTask);
+              taskService.addEmptyTask();
             }
           }
         } catch (error) {
@@ -184,17 +160,6 @@ const taskService = {
     );
   },
 
-  save(task, callback) {
-    const xhr = new FAJAX();
-    xhr.send(
-      {
-        type: "POST",
-        url: "/tasks",
-        data: task,
-      },
-      () => callback(xhr.status === 200)
-    );
-  },
 
   delete(taskId, callback) {
     const xhr = new FAJAX();
@@ -208,6 +173,7 @@ const taskService = {
         const success = xhr.status === 200 && xhr.readyState === 4;
         if (success) {
           console.log(`Task with ID ${taskId} deleted successfully.`);
+          addEmptyTask();
         } else {
           console.error("Failed to delete task");
           alert("❌ Failed to delete task. Please try again.");
@@ -241,76 +207,7 @@ const taskService = {
  * Task UI
  * Handles the display and UI interactions for tasks
  */
-// const taskUI = {
-//   add(task) {
-//     const taskList = document.getElementById("taskList");
-//     if (!taskList) return;
 
-//     const taskItem = document.createElement("li");
-//     taskItem.dataset.taskId = task.id;
-
-//     // Create checkbox
-//     const checkbox = document.createElement("input");
-//     checkbox.type = "checkbox";
-//     checkbox.className = "task-checkbox";
-//     checkbox.checked = task.isCompleted;
-//     checkbox.addEventListener("change", () => {
-//       task.isCompleted = checkbox.checked;
-//       taskText.style.textDecoration = task.isCompleted
-//         ? "line-through"
-//         : "none";
-//       taskService.update(task);
-//     });
-
-//     // Create task text
-//     const taskText = document.createElement("span");
-//     taskText.textContent = task.text;
-//     taskText.style.textDecoration = task.isCompleted ? "line-through" : "none";
-//     taskText.style.cursor = "pointer"; // Add pointer cursor to indicate clickable
-
-//     // uptate when double click
-//     taskText.addEventListener("dblclick", () => {
-//       const newTaskText = prompt("Edit task:", task.text);
-//       if (newTaskText && newTaskText.trim()) {
-//         task.text = newTaskText.trim();
-//         taskText.textContent = task.text;
-//         taskService.update(task);
-//       }
-//     });
-
-//     // Create edit button
-//     const editButton = document.createElement("button");
-//     editButton.textContent = "Edit";
-//     editButton.className = "edit-btn";
-//     editButton.addEventListener("click", () => {
-//       const newTaskText = prompt("Edit task:", task.text);
-//       if (newTaskText && newTaskText.trim()) {
-//         task.text = newTaskText.trim();
-//         taskText.textContent = task.text;
-//         taskService.update(task);
-//       }
-//     });
-
-//     // Create delete button
-//     const deleteButton = document.createElement("button");
-//     deleteButton.textContent = "Delete";
-//     deleteButton.className = "delete-btn";
-//     deleteButton.addEventListener("click", () => {
-//       taskService.delete(task.id, (success) => {
-//         if (success) {
-//           taskItem.remove();
-//         }
-//       });
-//     });
-
-//     // Add elements to the list item
-//     taskItem.append(checkbox, taskText);
-//     if (task.text) {
-//       taskItem.append(editButton, deleteButton);
-//     }
-//     taskList.appendChild(taskItem);
-//   },
-// };
 const taskUI = {
   add(task) {
     const taskList = document.getElementById("taskList");
@@ -318,19 +215,6 @@ const taskUI = {
 
     const taskItem = document.createElement("li");
     taskItem.dataset.taskId = task.id;
-
-    // Create checkbox
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "task-checkbox";
-    checkbox.checked = task.isCompleted;
-    checkbox.addEventListener("change", () => {
-      task.isCompleted = checkbox.checked;
-      taskText.style.textDecoration = task.isCompleted
-        ? "line-through"
-        : "none";
-      taskService.update(task);
-    });
 
     // Create task text
     const taskText = document.createElement("span");
@@ -366,6 +250,18 @@ const taskUI = {
       input.addEventListener("blur", () => {
         input.replaceWith(taskText);
       });
+    });
+    // Create checkbox
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "task-checkbox";
+    checkbox.checked = task.isCompleted;
+    checkbox.addEventListener("change", () => {
+      task.isCompleted = checkbox.checked;
+      taskText.style.textDecoration = task.isCompleted
+        ? "line-through"
+        : "none";
+      taskService.update(task);
     });
 
     // Create delete button

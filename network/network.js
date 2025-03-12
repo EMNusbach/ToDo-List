@@ -13,13 +13,13 @@ export function sendRequest(method, url, data, callback) {
   const dropProbability = Math.random();
 
   setTimeout(() => {
+    let response;
     if (dropProbability < 0.2) {
       // request get lost
       console.warn("FAJAX: Request lost in the network simulation.");
-      return;
-    }
 
-    let response;
+      return callback("Request lost in the network simulation", null);
+    }
 
     if (url === "/users") {
       switch (method) {
