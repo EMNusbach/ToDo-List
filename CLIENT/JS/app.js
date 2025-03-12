@@ -59,7 +59,8 @@ const app = {
                 }
                 break;
             case "tasksPage":
-                // If you have tasks-specific JS initialization
+                // console.log("Initializing tasks page");
+                // tasksPageController.init();
                 break;
         }
     },

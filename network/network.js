@@ -1,11 +1,5 @@
-// import { GetAll, Get, Put, Post, Delete } from "../SERVER/server.js";
 import {
-  task_GetAll,
-  task_Get,
-  task_Put,
-  task_Post,
-  task_Delete,
-} from "../SERVER/task_server.js";
+  task_GetAll, task_Get, task_Put, task_Post, task_Delete} from "../SERVER/task_server.js";
 import { user_GetAll, user_Get, user_Post } from "../SERVER/user_server.js";
 
 export function sendRequest(method, url, data, callback) {
@@ -41,16 +35,16 @@ export function sendRequest(method, url, data, callback) {
           response = task_GetAll(url);
           break;
         case "GET":
-          response = task_Get(url);
+          response = task_Get(url, data);
           break;
         case "POST":
-          response = task_Post(url, data);
+          response = task_Post(url,data);
           break;
         case "PUT":
-          response = task_Put(url, data);
+          response = task_Put(url,data);
           break;
         case "DELETE":
-          response = task_Delete(url, data);
+          response = task_Delete(url,data);
           break;
         default:
           return callback("Unsupported method", null);
@@ -61,26 +55,4 @@ export function sendRequest(method, url, data, callback) {
   }, delay);
 }
 
-// let response;
-// switch (method) {
-//   case "GETALL":
-//     response = GetAll(url);
-//     break;
-//   case "GET":
-//     response = Get(url, data)
-//     //response = Get(url);
-//     break;
-//   case "POST":
-//     response = Post(url, data);
-//     break;
-//   // case "PUT":
-//   //   response = Put(url, data);
-//   //   break;
-//   // case "DELETE":
-//   //   response = Delete(url, data);
-//   //   break;
-//   default:
-//     return callback("Unsupported method", null);
-// }
 
-// מחזירים את התשובה אחרי הסימולציה

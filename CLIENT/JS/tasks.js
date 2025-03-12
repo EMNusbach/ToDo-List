@@ -122,6 +122,7 @@ const taskService = {
       id: `${Date.now()}`,
       text: "",
       isCompleted: false,
+      usersId: sessionStorage.getItem("usersId")
     };
     taskUI.add(emptyTask);
   },
@@ -173,7 +174,8 @@ const taskService = {
         const success = xhr.status === 200 && xhr.readyState === 4;
         if (success) {
           console.log(`Task with ID ${taskId} deleted successfully.`);
-          addEmptyTask();
+          //addEmptyTask();
+          this.load();
         } else {
           console.error("Failed to delete task");
           alert("❌ Failed to delete task. Please try again.");
@@ -283,6 +285,7 @@ const taskUI = {
     taskList.appendChild(taskItem);
   },
 };
+
 /**
  * Notes Service
  * Handles note data operations with the server
@@ -296,7 +299,7 @@ const noteService = {
     xhr.send(
       {
         type: "GETALL",
-        url: "/notes",
+        url: "/tasks",
       },
       () => {
         try {
@@ -317,13 +320,16 @@ const noteService = {
   },
 
   createEmptyNote(textarea) {
-    const emptyNote = { id: "user-notes", text: "" };
+    const emptyNote = { 
+      id: "user-notes", 
+      text: "" ,
+      userId: sessionStorage.getItem("userId")};
     const xhr = new FAJAX();
 
     xhr.send(
       {
         type: "POST",
-        url: "/notes",
+        url: "/tasks",
         data: emptyNote,
       },
       () => {
@@ -345,12 +351,13 @@ const noteService = {
     xhr.send(
       {
         type: "PUT",
-        url: "/notes",
+        url: "/tasks",
         data: note,
       },
       () => {
         if (xhr.status === 200 && xhr.readyState === 4) {
           console.log("Notes saved successfully");
+          this.load();
         } else {
           console.error("Failed to save notes");
           alert("❌ Failed to save notes. Please try again.");

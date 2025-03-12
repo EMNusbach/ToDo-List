@@ -1,12 +1,12 @@
 // @ts-nocheck
 let all = [];
-
 export function task_GetAll(url) {
   let all = []; // מאפס את הרשימה בכל קריאה
+  const usersId = sessionStorage.getItem("usersId");
   try {
     const storedData = localStorage.getItem(url);
     if (storedData) {
-      all = JSON.parse(storedData); // טוען רק אם יש נתונים
+      all = JSON.parse(storedData).filter(item => item.usersId === usersId); // טוען רק אם יש נתונים
     }
   } catch (error) {
     console.error("Error loading tasks from localStorage:", error);
@@ -14,9 +14,9 @@ export function task_GetAll(url) {
   return all;
 }
 
-export function task_Get(url) {
+export function task_Get(url, data) {
   for (let i = 0; i < localStorage.length; i++) {
-    if (localStorage.key(i) === url) {
+    if (localStorage.key(i) === url && data.usersId === usersID) {
       return JSON.parse(localStorage.getItem(url));
     }
   }
@@ -48,6 +48,7 @@ export function task_Put(url, updatedItem) {
 
 export function task_Delete(url, itemId) {
   try {
+
     let parts = url.split("/");
     let dataPath = `/${parts[1]}`;
     let storedData;
@@ -70,3 +71,5 @@ export function task_Delete(url, itemId) {
     return { error: "Error deleting item" };
   }
 }
+
+

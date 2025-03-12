@@ -76,6 +76,11 @@ const AuthService = {
           
           if (response.status === 200 && response.user) {
             console.log("Login successful:", response.user.username);
+
+            // Store userId in sessionStorage after successful login
+            sessionStorage.setItem("usersId", response.user.id); 
+            //sessionStorage.setItem("currentUser", JSON.stringify(response.user));
+
             callback(true, response.user);
           } else {
             console.error("Login failed:", response.message || "Unknown error");
